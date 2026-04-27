@@ -7,11 +7,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PersonsModule } from '../persons/persons.module';
 import { Person } from '../persons/entities/person.entity';
 import { Transaction } from '../transactions/entities/transaction.entity';
+import { TransactionsModule } from '../transactions/transactions.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Account, Person, Transaction]),
     PersonsModule,
+    TransactionsModule,
   ],
   controllers: [AccountsController],
   providers: [AccountsService],
