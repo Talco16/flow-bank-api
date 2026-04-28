@@ -1,9 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, Min } from 'class-validator';
+import { AmountDto } from './amount.dto';
 
-export class DepositRequestDto {
-  @ApiProperty({ example: 100 })
-  @IsNumber()
-  @Min(0.01)
-  value!: number;
-}
+export class DepositRequestDto extends AmountDto {}

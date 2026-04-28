@@ -1,98 +1,254 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Flow Bank API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 📌 Overview
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Flow Bank API is a RESTful banking service built with NestJS, PostgreSQL, and TypeORM.
 
-## Description
+The system supports:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Account creation
+- Deposit / Withdrawal
+- Balance inquiry
+- Account blocking / unblocking
+- Transaction statement (with period filtering)
 
-## Project setup
+---
+
+## 🚀 Running the Project
+
+### Option 1 – Docker (recommended)
 
 ```bash
-$ npm install
+docker compose down -v
+docker compose up --build
 ```
 
-## Compile and run the project
+API will be available at:
+http://localhost:3000
+
+Swagger:
+http://localhost:3000/api
+
+---
+
+### Option 2 – Local
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+npm run build
+npm run start:dev
 ```
 
-## Run tests
+---
 
-```bash
-# unit tests
-$ npm run test
+## 🧱 Project Structure
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+src/
+  accounts/
+  persons/
+  transactions/
 ```
 
-## Deployment
+Each module contains:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- Controller
+- Service
+- DTOs
+- Entity
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+---
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+## 🗄 Database
+
+PostgreSQL is used.
+
+Seed data is automatically inserted on first run using:
+database/init/seed.sql
+
+---
+
+## 📡 API Endpoints
+
+### Accounts
+
+- POST /accounts – Create account
+- POST /accounts/:id/deposit – Deposit money
+- POST /accounts/:id/withdraw – Withdraw money
+- GET /accounts/:id/balance – Get balance
+- PATCH /accounts/:id/block – Block account
+- PATCH /accounts/:id/unblock – Unblock account
+- GET /accounts/:id/transactions – Get statement
+  - Optional: ?from=YYYY-MM-DD&to=YYYY-MM-DD
+
+---
+
+## ⚠️ Error Handling
+
+- 400 – Invalid input / business rule violation
+- 404 – Resource not found
+
+---
+
+## 🧠 Design Highlights
+
+- Transaction-safe operations (DB transactions)
+- Clean separation of concerns
+- DTO-based validation
+- Enum-to-string mapping for readability
+- Reusable service logic (no duplication)
+
+---
+
+## 📄 Architecture
+
+See:
+ARCHITECTURE.md
+
+---
+
+## 🧪 API Examples
+
+### Create Account
+
+POST /accounts
+
+Request:
+
+```json
+{
+  "personId": 1,
+  "dailyWithdrawalLimit": 1000,
+  "accountType": 1
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Response:
 
-## Resources
+```json
+{
+  "id": 1,
+  "personId": 1,
+  "balance": 0,
+  "activeFlag": true,
+  "accountType": 1,
+  "dailyWithdrawalLimit": 1000,
+  "createdAt": "2026-04-27T09:11:25.448Z"
+}
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Deposit
 
-## Support
+POST /accounts/1/deposit
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Request:
 
-## Stay in touch
+```json
+{
+  "value": 200
+}
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Response:
 
-## License
+```json
+{
+  "id": 1,
+  "personId": 1,
+  "balance": 200,
+  "activeFlag": true,
+  "accountType": 1,
+  "dailyWithdrawalLimit": 1000,
+  "createdAt": "2026-04-27T09:11:25.448Z"
+}
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+### Withdraw
+
+POST /accounts/1/withdraw
+
+Request:
+
+```json
+{
+  "value": 50
+}
+```
+
+Response:
+
+```json
+{
+  "id": 1,
+  "personId": 1,
+  "balance": 150,
+  "activeFlag": true,
+  "accountType": 1,
+  "dailyWithdrawalLimit": 1000,
+  "createdAt": "2026-04-27T09:11:25.448Z"
+}
+```
+
+---
+
+### Get Balance
+
+GET /accounts/1/balance
+
+Response:
+
+```json
+{
+  "accountId": 1,
+  "balance": 150
+}
+```
+
+---
+
+### Block Account
+
+PATCH /accounts/1/block
+
+Response:
+
+```json
+{
+  "id": 1,
+  "activeFlag": false
+}
+```
+
+---
+
+### Get Statement
+
+GET /accounts/1/transactions?from=2026-04-01&to=2026-04-30
+
+Response:
+
+```json
+[
+  {
+    "id": 1,
+    "accountId": 1,
+    "type": "DEPOSIT",
+    "value": 200,
+    "createdAt": "2026-04-27T09:11:25.448Z"
+  }
+]
+```
+
+---
+
+## 🔮 Future Improvements
+
+- Authentication & authorization
+- Pagination for statements
+- Transfers between accounts
+- Logging & monitoring
+- Database migrations
