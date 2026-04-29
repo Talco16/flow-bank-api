@@ -7,6 +7,7 @@ import {
   Get,
   Patch,
   Query,
+  HttpCode,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -46,6 +47,7 @@ export class AccountsController {
     description: 'Invalid amount or inactive account',
   })
   @ApiResponse({ status: 404, description: 'Account not found' })
+  @HttpCode(200)
   @Post(':accountId/deposit')
   depositMoney(
     @Param('accountId', ParseIntPipe) accountId: number,
@@ -66,6 +68,7 @@ export class AccountsController {
       'Invalid value, inactive account, insufficient funds or daily limit exceeded',
   })
   @ApiResponse({ status: 404, description: 'Account not found' })
+  @HttpCode(200)
   @Post(':accountId/withdraw')
   withdrawMoney(
     @Param('accountId', ParseIntPipe) accountId: number,
@@ -99,7 +102,8 @@ export class AccountsController {
     type: AccountResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Account not found' })
-  @Patch(':accountId/block-account')
+  @HttpCode(200)
+  @Patch(':accountId/block')
   blockAccount(
     @Param('accountId', ParseIntPipe) accountId: number,
   ): Promise<AccountResponseDto> {
@@ -113,6 +117,7 @@ export class AccountsController {
     type: AccountResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Account not found' })
+  @HttpCode(200)
   @Patch(':accountId/unblock')
   unblockAccount(
     @Param('accountId', ParseIntPipe) accountId: number,

@@ -105,7 +105,7 @@ export class AccountsService {
 
     const transactions = await this.dataSource.getRepository(Transaction).find({
       where,
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'ASC' },
     });
 
     return transactions.map((transaction) =>
@@ -126,11 +126,14 @@ export class AccountsService {
     } = { accountId };
 
     if (query.from && query.to) {
-      where.createdAt = Between(new Date(query.from), new Date(query.to));
+      where.createdAt = Between(
+        this.getStartOfDay(query.from),
+        this.getEndOfDay(query.to),
+      );
     } else if (query.from) {
-      where.createdAt = MoreThanOrEqual(new Date(query.from));
+      where.createdAt = MoreThanOrEqual(this.getStartOfDay(query.from));
     } else if (query.to) {
-      where.createdAt = LessThanOrEqual(new Date(query.to));
+      where.createdAt = LessThanOrEqual(this.getEndOfDay(query.to));
     }
 
     return where;
@@ -264,5 +267,13 @@ export class AccountsService {
     const saved = await this.accountRepository.save(account);
 
     return this.toResponseDto(saved);
+  }
+
+  private getStartOfDay(date: string): Date {
+    return new Date(`${date}T00:00:00.000Z`);
+  }
+
+  private getEndOfDay(date: string): Date {
+    return new Date(`${date}T23:59:59.999Z`);
   }
 }

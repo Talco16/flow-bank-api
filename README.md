@@ -10,7 +10,7 @@ The system supports:
 - Deposit / Withdrawal
 - Balance inquiry
 - Account blocking / unblocking
-- Transaction statement (with period filtering)
+- Transaction statement (with optional period filtering)
 
 ---
 
@@ -50,21 +50,21 @@ src/
   transactions/
 ```
 
-Each module contains:
-
-- Controller
-- Service
-- DTOs
-- Entity
-
 ---
 
-## 🗄 Database
+## 🗄 Database & Seed
 
 PostgreSQL is used.
 
-Seed data is automatically inserted on first run using:
+Seed file:
 database/init/seed.sql
+
+Default user:
+('Tal Cohen', '123456789', '1994-06-16')
+
+Reset DB:
+docker compose down -v
+docker compose up --build
 
 ---
 
@@ -82,6 +82,14 @@ database/init/seed.sql
   - Optional: ?from=YYYY-MM-DD&to=YYYY-MM-DD
 
 ---
+
+## 🧪 Tests
+
+Unit:
+npm run test
+
+E2E:
+npm run test:e2e
 
 ## ⚠️ Error Handling
 
