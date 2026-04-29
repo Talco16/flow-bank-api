@@ -22,7 +22,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: true, // רק לפיתוח
+        synchronize: true,
       }),
     }),
     AccountsModule,

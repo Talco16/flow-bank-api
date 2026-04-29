@@ -63,8 +63,9 @@ Default user:
 ('Tal Cohen', '123456789', '1994-06-16')
 
 Reset DB:
-docker compose down -v
-docker compose up --build
+
+- docker compose down -v
+- docker compose up --build
 
 ---
 
