@@ -250,14 +250,19 @@ describe('AccountsService', () => {
   });
 });
 
-function createMockManager(account: Account): {
-  getRepository: jest.Mock;
-  save: jest.Mock;
-} {
+function createMockManager(account: Account) {
   return {
     getRepository: jest.fn().mockReturnValue({
       findOne: jest.fn().mockResolvedValue(account),
+
+      createQueryBuilder: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ total: '0' }), // 👈 חשוב
+      }),
     }),
+
     save: jest
       .fn()
       .mockImplementation((_entity, data) => Promise.resolve(data)),

@@ -161,17 +161,16 @@ export class AccountsService {
     type: TransactionType,
   ): Promise<AccountResponseDto> {
     return this.dataSource.transaction(async (manager) => {
-      const account = await this.findAccountOrFail(accountId, manager);
+      const account = await this.findAccountOrFail(accountId, manager, true);
 
       this.validateAccountIsActive(account);
       this.validatePositiveValue(value);
 
       if (type === TransactionType.WITHDRAW) {
-        this.validateWithdrawal(account, value);
-        account.balance -= value;
-      } else {
-        account.balance += value;
+        await this.validateWithdrawal(manager, account, value);
       }
+
+      account.balance = this.calculateNewBalance(account, value, type);
 
       const savedAccount = await manager.save(Account, account);
 
@@ -188,6 +187,7 @@ export class AccountsService {
   private async findAccountOrFail(
     accountId: number,
     manager?: EntityManager,
+    withLock = false,
   ): Promise<Account> {
     const repository = manager
       ? manager.getRepository(Account)
@@ -195,6 +195,7 @@ export class AccountsService {
 
     const account = await repository.findOne({
       where: { id: accountId },
+      lock: withLock ? { mode: 'pessimistic_write' } : undefined,
     });
 
     if (!account) {
@@ -228,14 +229,60 @@ export class AccountsService {
     }
   }
 
-  private validateWithdrawal(account: Account, value: number): void {
+  private async validateWithdrawal(
+    manager: EntityManager,
+    account: Account,
+    value: number,
+  ): Promise<void> {
     if (account.balance < value) {
       throw new BadRequestException('Insufficient funds');
     }
 
-    if (value > account.dailyWithdrawalLimit) {
+    await this.validateDailyWithdrawalLimit(manager, account, value);
+  }
+
+  private async validateDailyWithdrawalLimit(
+    manager: EntityManager,
+    account: Account,
+    value: number,
+  ): Promise<void> {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const result = await manager
+      .getRepository(Transaction)
+      .createQueryBuilder('transaction')
+      .select('COALESCE(SUM(transaction.value), 0)', 'total')
+      .where('transaction.accountId = :accountId', { accountId: account.id })
+      .andWhere('transaction.type = :type', {
+        type: TransactionType.WITHDRAW,
+      })
+      .andWhere('transaction.createdAt BETWEEN :start AND :end', {
+        start: startOfDay,
+        end: endOfDay,
+      })
+      .getRawOne<{ total: string }>();
+
+    const totalWithdrawnToday = Number(result?.total ?? 0);
+
+    if (totalWithdrawnToday + value > account.dailyWithdrawalLimit) {
       throw new BadRequestException('Daily withdrawal limit exceeded');
     }
+  }
+
+  private calculateNewBalance(
+    account: Account,
+    value: number,
+    type: TransactionType,
+  ): number {
+    if (type === TransactionType.DEPOSIT) {
+      return account.balance + value;
+    }
+
+    return account.balance - value;
   }
 
   private toResponseDto(account: Account): AccountResponseDto {
